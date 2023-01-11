@@ -61,8 +61,8 @@ public class CharacterAppearance : MonoBehaviour
         animationUpdate();
     }
 
-        // Runs after the animation has done its work
-        private void LateUpdate()
+    // Runs after the animation has done its work
+    private void LateUpdate()
     {
         // Check if the sprite sheet name has changed (possibly manually in the inspector)
         if (this.LoadedSpriteSheetName != this.SpriteSheetName)
@@ -80,10 +80,15 @@ public class CharacterAppearance : MonoBehaviour
     // Set the animation parameters
     public void animationUpdate()
     {
-        animator.SetFloat("speed", Mathf.Abs(movement.x) + Mathf.Abs(movement.y));
         if (movement.x > 0)
-            animator.SetInteger("orientation", 6);
-        if (movement.x < 0)
+            spriteRenderer.flipX = true;
+        else
+            spriteRenderer.flipX = false;
+
+
+        animator.SetFloat("speed", Mathf.Abs(movement.x) + Mathf.Abs(movement.y));
+        //animator.SetInteger("orientation", 0);
+        if (movement.x != 0)
             animator.SetInteger("orientation", 2);
         if (movement.y > 0)
             animator.SetInteger("orientation", 0);
