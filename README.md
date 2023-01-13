@@ -3,4 +3,4 @@
 It is owned by B2014577.
 
 
-Note: Require Git LFS (Large File Storage).
+Expected to be completed in April 2023.
