@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Wall
+  - DDOL
   layers:
   - Default
   - TransparentFX
@@ -39,6 +40,27 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Ground
+    uniqueID: 3889870107
+    locked: 0
+  - name: Decorate
+    uniqueID: 3617361473
+    locked: 0
+  - name: TopLayerDecorate
+    uniqueID: 3881770513
+    locked: 0
+  - name: TopGround
+    uniqueID: 4115205081
+    locked: 0
+  - name: Wall
+    uniqueID: 2740768421
+    locked: 0
+  - name: WallDecorate
+    uniqueID: 3868836241
+    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Player
+    uniqueID: 471356785
     locked: 0
