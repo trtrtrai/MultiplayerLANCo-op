@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Wall
   - DDOL
+  - Bullet
   layers:
   - Default
   - TransparentFX

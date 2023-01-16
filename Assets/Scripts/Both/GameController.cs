@@ -1,3 +1,7 @@
+using Assets.Scripts.Both;
+using Assets.Scripts.Both.Creature.Attackable;
+using Assets.Scripts.Both.Creature.Controllers;
+using Assets.Scripts.Both.Creature.Player;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,6 +54,11 @@ public class GameController : NetworkBehaviour
         };
 
         SpawnCameraClientRpc(clientRpcParams);
+    }
+
+    public void CastSpell(SkillName name, NetworkObjectReference netRef)
+    {
+        Debug.Log("Cast " + name);
     }
 
     /// <summary>

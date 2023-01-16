@@ -15,12 +15,14 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
 
-public partial class @PlayerActions : IInputActionCollection2, IDisposable
+namespace Assets.Scripts.Both.InputActions
 {
-    public InputActionAsset asset { get; }
-    public @PlayerActions()
+    public partial class @PlayerActions : IInputActionCollection2, IDisposable
     {
-        asset = InputActionAsset.FromJson(@"{
+        public InputActionAsset asset { get; }
+        public @PlayerActions()
+        {
+            asset = InputActionAsset.FromJson(@"{
     ""name"": ""PlayerActions"",
     ""maps"": [
         {
@@ -155,128 +157,129 @@ public partial class @PlayerActions : IInputActionCollection2, IDisposable
         }
     ]
 }");
+            // Ground
+            m_Ground = asset.FindActionMap("Ground", throwIfNotFound: true);
+            m_Ground_Movement = m_Ground.FindAction("Movement", throwIfNotFound: true);
+            m_Ground_Attack = m_Ground.FindAction("Attack", throwIfNotFound: true);
+            m_Ground_SpecialAttack = m_Ground.FindAction("SpecialAttack", throwIfNotFound: true);
+        }
+
+        public void Dispose()
+        {
+            UnityEngine.Object.Destroy(asset);
+        }
+
+        public InputBinding? bindingMask
+        {
+            get => asset.bindingMask;
+            set => asset.bindingMask = value;
+        }
+
+        public ReadOnlyArray<InputDevice>? devices
+        {
+            get => asset.devices;
+            set => asset.devices = value;
+        }
+
+        public ReadOnlyArray<InputControlScheme> controlSchemes => asset.controlSchemes;
+
+        public bool Contains(InputAction action)
+        {
+            return asset.Contains(action);
+        }
+
+        public IEnumerator<InputAction> GetEnumerator()
+        {
+            return asset.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public void Enable()
+        {
+            asset.Enable();
+        }
+
+        public void Disable()
+        {
+            asset.Disable();
+        }
+        public IEnumerable<InputBinding> bindings => asset.bindings;
+
+        public InputAction FindAction(string actionNameOrId, bool throwIfNotFound = false)
+        {
+            return asset.FindAction(actionNameOrId, throwIfNotFound);
+        }
+        public int FindBinding(InputBinding bindingMask, out InputAction action)
+        {
+            return asset.FindBinding(bindingMask, out action);
+        }
+
         // Ground
-        m_Ground = asset.FindActionMap("Ground", throwIfNotFound: true);
-        m_Ground_Movement = m_Ground.FindAction("Movement", throwIfNotFound: true);
-        m_Ground_Attack = m_Ground.FindAction("Attack", throwIfNotFound: true);
-        m_Ground_SpecialAttack = m_Ground.FindAction("SpecialAttack", throwIfNotFound: true);
-    }
-
-    public void Dispose()
-    {
-        UnityEngine.Object.Destroy(asset);
-    }
-
-    public InputBinding? bindingMask
-    {
-        get => asset.bindingMask;
-        set => asset.bindingMask = value;
-    }
-
-    public ReadOnlyArray<InputDevice>? devices
-    {
-        get => asset.devices;
-        set => asset.devices = value;
-    }
-
-    public ReadOnlyArray<InputControlScheme> controlSchemes => asset.controlSchemes;
-
-    public bool Contains(InputAction action)
-    {
-        return asset.Contains(action);
-    }
-
-    public IEnumerator<InputAction> GetEnumerator()
-    {
-        return asset.GetEnumerator();
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
-
-    public void Enable()
-    {
-        asset.Enable();
-    }
-
-    public void Disable()
-    {
-        asset.Disable();
-    }
-    public IEnumerable<InputBinding> bindings => asset.bindings;
-
-    public InputAction FindAction(string actionNameOrId, bool throwIfNotFound = false)
-    {
-        return asset.FindAction(actionNameOrId, throwIfNotFound);
-    }
-    public int FindBinding(InputBinding bindingMask, out InputAction action)
-    {
-        return asset.FindBinding(bindingMask, out action);
-    }
-
-    // Ground
-    private readonly InputActionMap m_Ground;
-    private IGroundActions m_GroundActionsCallbackInterface;
-    private readonly InputAction m_Ground_Movement;
-    private readonly InputAction m_Ground_Attack;
-    private readonly InputAction m_Ground_SpecialAttack;
-    public struct GroundActions
-    {
-        private @PlayerActions m_Wrapper;
-        public GroundActions(@PlayerActions wrapper) { m_Wrapper = wrapper; }
-        public InputAction @Movement => m_Wrapper.m_Ground_Movement;
-        public InputAction @Attack => m_Wrapper.m_Ground_Attack;
-        public InputAction @SpecialAttack => m_Wrapper.m_Ground_SpecialAttack;
-        public InputActionMap Get() { return m_Wrapper.m_Ground; }
-        public void Enable() { Get().Enable(); }
-        public void Disable() { Get().Disable(); }
-        public bool enabled => Get().enabled;
-        public static implicit operator InputActionMap(GroundActions set) { return set.Get(); }
-        public void SetCallbacks(IGroundActions instance)
+        private readonly InputActionMap m_Ground;
+        private IGroundActions m_GroundActionsCallbackInterface;
+        private readonly InputAction m_Ground_Movement;
+        private readonly InputAction m_Ground_Attack;
+        private readonly InputAction m_Ground_SpecialAttack;
+        public struct GroundActions
         {
-            if (m_Wrapper.m_GroundActionsCallbackInterface != null)
+            private @PlayerActions m_Wrapper;
+            public GroundActions(@PlayerActions wrapper) { m_Wrapper = wrapper; }
+            public InputAction @Movement => m_Wrapper.m_Ground_Movement;
+            public InputAction @Attack => m_Wrapper.m_Ground_Attack;
+            public InputAction @SpecialAttack => m_Wrapper.m_Ground_SpecialAttack;
+            public InputActionMap Get() { return m_Wrapper.m_Ground; }
+            public void Enable() { Get().Enable(); }
+            public void Disable() { Get().Disable(); }
+            public bool enabled => Get().enabled;
+            public static implicit operator InputActionMap(GroundActions set) { return set.Get(); }
+            public void SetCallbacks(IGroundActions instance)
             {
-                @Movement.started -= m_Wrapper.m_GroundActionsCallbackInterface.OnMovement;
-                @Movement.performed -= m_Wrapper.m_GroundActionsCallbackInterface.OnMovement;
-                @Movement.canceled -= m_Wrapper.m_GroundActionsCallbackInterface.OnMovement;
-                @Attack.started -= m_Wrapper.m_GroundActionsCallbackInterface.OnAttack;
-                @Attack.performed -= m_Wrapper.m_GroundActionsCallbackInterface.OnAttack;
-                @Attack.canceled -= m_Wrapper.m_GroundActionsCallbackInterface.OnAttack;
-                @SpecialAttack.started -= m_Wrapper.m_GroundActionsCallbackInterface.OnSpecialAttack;
-                @SpecialAttack.performed -= m_Wrapper.m_GroundActionsCallbackInterface.OnSpecialAttack;
-                @SpecialAttack.canceled -= m_Wrapper.m_GroundActionsCallbackInterface.OnSpecialAttack;
-            }
-            m_Wrapper.m_GroundActionsCallbackInterface = instance;
-            if (instance != null)
-            {
-                @Movement.started += instance.OnMovement;
-                @Movement.performed += instance.OnMovement;
-                @Movement.canceled += instance.OnMovement;
-                @Attack.started += instance.OnAttack;
-                @Attack.performed += instance.OnAttack;
-                @Attack.canceled += instance.OnAttack;
-                @SpecialAttack.started += instance.OnSpecialAttack;
-                @SpecialAttack.performed += instance.OnSpecialAttack;
-                @SpecialAttack.canceled += instance.OnSpecialAttack;
+                if (m_Wrapper.m_GroundActionsCallbackInterface != null)
+                {
+                    @Movement.started -= m_Wrapper.m_GroundActionsCallbackInterface.OnMovement;
+                    @Movement.performed -= m_Wrapper.m_GroundActionsCallbackInterface.OnMovement;
+                    @Movement.canceled -= m_Wrapper.m_GroundActionsCallbackInterface.OnMovement;
+                    @Attack.started -= m_Wrapper.m_GroundActionsCallbackInterface.OnAttack;
+                    @Attack.performed -= m_Wrapper.m_GroundActionsCallbackInterface.OnAttack;
+                    @Attack.canceled -= m_Wrapper.m_GroundActionsCallbackInterface.OnAttack;
+                    @SpecialAttack.started -= m_Wrapper.m_GroundActionsCallbackInterface.OnSpecialAttack;
+                    @SpecialAttack.performed -= m_Wrapper.m_GroundActionsCallbackInterface.OnSpecialAttack;
+                    @SpecialAttack.canceled -= m_Wrapper.m_GroundActionsCallbackInterface.OnSpecialAttack;
+                }
+                m_Wrapper.m_GroundActionsCallbackInterface = instance;
+                if (instance != null)
+                {
+                    @Movement.started += instance.OnMovement;
+                    @Movement.performed += instance.OnMovement;
+                    @Movement.canceled += instance.OnMovement;
+                    @Attack.started += instance.OnAttack;
+                    @Attack.performed += instance.OnAttack;
+                    @Attack.canceled += instance.OnAttack;
+                    @SpecialAttack.started += instance.OnSpecialAttack;
+                    @SpecialAttack.performed += instance.OnSpecialAttack;
+                    @SpecialAttack.canceled += instance.OnSpecialAttack;
+                }
             }
         }
-    }
-    public GroundActions @Ground => new GroundActions(this);
-    private int m_KeyboardSchemeIndex = -1;
-    public InputControlScheme KeyboardScheme
-    {
-        get
+        public GroundActions @Ground => new GroundActions(this);
+        private int m_KeyboardSchemeIndex = -1;
+        public InputControlScheme KeyboardScheme
         {
-            if (m_KeyboardSchemeIndex == -1) m_KeyboardSchemeIndex = asset.FindControlSchemeIndex("Keyboard");
-            return asset.controlSchemes[m_KeyboardSchemeIndex];
+            get
+            {
+                if (m_KeyboardSchemeIndex == -1) m_KeyboardSchemeIndex = asset.FindControlSchemeIndex("Keyboard");
+                return asset.controlSchemes[m_KeyboardSchemeIndex];
+            }
         }
-    }
-    public interface IGroundActions
-    {
-        void OnMovement(InputAction.CallbackContext context);
-        void OnAttack(InputAction.CallbackContext context);
-        void OnSpecialAttack(InputAction.CallbackContext context);
+        public interface IGroundActions
+        {
+            void OnMovement(InputAction.CallbackContext context);
+            void OnAttack(InputAction.CallbackContext context);
+            void OnSpecialAttack(InputAction.CallbackContext context);
+        }
     }
 }
