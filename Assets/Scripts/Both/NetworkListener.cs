@@ -77,16 +77,19 @@ namespace Assets.Scripts.Both
                         // Server Side: receives this notification for both itself and all clients
                         if (NetworkManager.Singleton.IsServer)
                         {
-                            GameController.Instance.SpawnPlayer(sceneEvent.ClientId);
-
                             if (sceneEvent.ClientId == NetworkManager.Singleton.LocalClientId)
                             {
                                 // Handle server side LoadComplete related tasks here
-                                Debug.Log("Server load " + sceneEvent.ClientId + " completed");
+                                Debug.Log("Server load completed");
+                                //Spawn GameManager
+                                var gameCtroller = Instantiate(Resources.Load<GameObject>("Manager/GameController"));
+                                GameController.Instance.SpawnGameObject(gameCtroller, true);
+
+                                GameController.Instance.InstantiateGameObject("Manager/CreatureConstruction", null);
 
                                 if (NetworkManager.Singleton.IsHost)
                                 {
-                                    Debug.Log("Host in server load completed");
+                                    Debug.Log("Server is also host");
                                 }
                             }
                             else
@@ -94,6 +97,8 @@ namespace Assets.Scripts.Both
                                 // Handle client LoadComplete **server-side** notifications here
                                 Debug.Log("Server side client load " + sceneEvent.ClientId + " completed");
                             }
+
+                            GameController.Instance.SpawnPlayer(sceneEvent.ClientId);
                         }
                         else // Clients generate this notification locally
                         {

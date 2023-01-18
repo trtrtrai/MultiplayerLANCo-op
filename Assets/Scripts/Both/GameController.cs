@@ -1,11 +1,15 @@
 using Assets.Scripts.Both;
+using Assets.Scripts.Both.Creature;
 using Assets.Scripts.Both.Creature.Attackable;
 using Assets.Scripts.Both.Creature.Controllers;
 using Assets.Scripts.Both.Creature.Player;
+using Assets.Scripts.Both.Scriptable;
+using Assets.Scripts.Server.Contruction.Builders;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -27,23 +31,27 @@ public class GameController : NetworkBehaviour
         }
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    public void SpawnPlayerServerRpc(ServerRpcParams serverRpcParams = default)
-    {
-        SpawnPlayer(serverRpcParams.Receive.SenderClientId);
-    }
-
     public void SpawnPlayer(ulong clientId)
     {
-        var player = Instantiate(Resources.Load<GameObject>("Player/PlayerPrefab"));
-        player.GetComponent<PlayerController>().Owner = clientId;
-        Instantiate(Resources.Load<GameObject>("Player/Sword"), player.transform);
-        Instantiate(Resources.Load<GameObject>("Player/SpecialShield"), player.transform);
+        CreatureBuilder builder = new CharacterBuilder();
+        CreatureDirector.Instance.Builder = builder;
+        CreatureDirector.Instance.CharacterBuild(CharacterClass.TankerSlash_model);
 
-        var control = Instantiate(Resources.Load<GameObject>("Player/PlayerControl"));
-        player.GetComponent<PlayerController>().AddControl(control.GetComponent<PlayerControl>());
-        control.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId, true);
-        player.GetComponent<NetworkObject>().Spawn(true);
+        var rs = builder.Release();
+        var playerTransform = (rs as NetworkBehaviour).transform;
+
+        var control = InstantiateGameObject("Player/PlayerControl", null); //PLayer control (real owned by client)
+
+        playerTransform.AddComponent<PlayerController>().AddControl(control.GetComponent<PlayerControl>()); //Add control into controller
+
+        //Instantiate skills
+        InstantiateGameObject("SkillBehave/Slash", playerTransform);
+        InstantiateGameObject("SkillBehave/Shield", playerTransform);
+
+        //Spawn accross network
+        playerTransform.gameObject.SetActive(true);
+        SpawnAsPlayerObject(control, clientId, true);
+        SpawnGameObject(playerTransform.gameObject);
 
         ClientRpcParams clientRpcParams = new ClientRpcParams
         {
@@ -53,6 +61,7 @@ public class GameController : NetworkBehaviour
             }
         };
 
+        //Setup camera
         SpawnCameraClientRpc(clientRpcParams);
     }
 
@@ -78,10 +87,61 @@ public class GameController : NetworkBehaviour
                 cmr.GetComponent<NetworkObject>().Spawn();
             }
 
-            var player = GameObject.FindGameObjectsWithTag("Player").ToList().First((p) => p.GetComponent<PlayerController>().Owner == NetworkManager.Singleton.LocalClientId).transform;
+            var player = GameObject.FindGameObjectsWithTag("Player").ToList().First((p) => p.GetComponent<NetworkObject>().OwnerClientId == NetworkManager.Singleton.LocalClientId).transform;
             var cmrFolow = cmr.GetComponent<CameraFollower>();
             cmrFolow.Target = player;
             cmrFolow.StartFocus();
         }
+    }
+
+    public GameObject InstantiateGameObject(string path, Transform parent)
+    {
+        if (parent)
+        {
+            return Instantiate(Resources.Load<GameObject>(path), parent);
+        }
+        else
+        {
+            return Instantiate(Resources.Load<GameObject>(path));
+        }
+    }
+
+    public GameObject InstantiateGameObject(string path, Transform parent, Vector3 pos)
+    {
+        GameObject obj;
+
+        if (parent)
+        {
+            obj = Instantiate(Resources.Load<GameObject>(path), parent);
+        }
+        else
+        {
+            obj = Instantiate(Resources.Load<GameObject>(path));
+        }
+
+        obj.transform.localPosition = pos;
+
+        return obj;
+    }
+
+    public void SpawnGameObject(GameObject gameObj, bool destroyWithScene = false)
+    {
+        if (gameObj.TryGetComponent(typeof(NetworkObject), out var netObj))
+        {
+            (netObj as NetworkObject).Spawn(destroyWithScene);
+        }
+    }
+
+    public void SpawnAsPlayerObject(GameObject gameObj, ulong clientId, bool destroyWithScene = false)
+    {
+        if (gameObj.TryGetComponent(typeof(NetworkObject), out var netObj))
+        {
+            (netObj as NetworkObject).SpawnAsPlayerObject(clientId, destroyWithScene);
+        }
+    }
+
+    public void SpawnWithOwnerShip()
+    {
+
     }
 }

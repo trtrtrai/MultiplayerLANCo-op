@@ -9,18 +9,18 @@ using UnityEngine;
 
 namespace Assets.Scripts.Both.Creature
 {
-    [RequireComponent(typeof(NetworkObject))]
-    public abstract class Creature : MonoBehaviour
+    [Serializable]
+    public abstract class Creature : NetworkBehaviour, ICreatureBuild, ICreature
     {
         [SerializeField] protected string creatureName;
         [SerializeField] protected List<Stats> status;
         [SerializeField] protected Attackable.Attackable attackable;
-        [SerializeField] protected bool isInit = false;
+        [SerializeField] protected CreatureForm form;
 
         public string Name => creatureName;
         public int SkillSlot => attackable.SkillSlot;
         public bool TouchDamage => attackable.TouchDamage;
-        public bool IsInit => isInit;
+        public CreatureForm Form => form;
 
         public virtual IStats GetStats(StatsType type)
         {
@@ -38,14 +38,14 @@ namespace Assets.Scripts.Both.Creature
             return null;
         }
 
-        public List<SkillName> GetSkills()
+        public List<ISkill> GetSkills()
         {
-            return attackable.Skills.GroupBy(x => x.SkillName).Select(x => x.Key).ToList();
+            return attackable.Skills.Select(s => (ISkill)s).ToList();
         }
 
         public bool ActivateSkill(SkillName skillName)
         {
-            ISkill skill = attackable.Skills.FirstOrDefault((s) => s.SkillName == skillName);
+            ISkillActive skill = attackable.Skills.FirstOrDefault((s) => s.SkillName == skillName);
 
             if (skill is null)
             {
@@ -72,5 +72,33 @@ namespace Assets.Scripts.Both.Creature
         {
             this.attackable = attackable;
         }
+    }
+
+    public enum CreatureForm
+    {
+        Character,
+        Boss,
+        Enemy,
+        Mobs,
+        Ally
+    }
+
+    public interface ICreatureBuild
+    {
+        void InitName(string name);
+        void InitStatus(List<Stats> status);
+        void InitAttack(Attackable.Attackable attackable);
+    }
+
+    public interface ICreature
+    {
+        public string Name { get; }
+        public int SkillSlot { get; }
+        public bool TouchDamage { get; }
+        public CreatureForm Form { get; }
+
+        IStats GetStats(StatsType type);
+        public List<ISkill> GetSkills();
+        public bool ActivateSkill(SkillName skillName);
     }
 }

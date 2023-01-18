@@ -26,7 +26,11 @@ namespace Assets.Scripts.Both.Creature.Controllers
         public Vector2 VectorAxis => control.VectorAxis;
         public Vector2 VectorState => control.VectorState;
 
-        public ulong Owner;
+        private void Awake()
+        {
+            animator = GetComponent<Animator>();
+            player = GetComponent<Rigidbody2D>();
+        }
 
         // Start is called before the first frame update
         void Start()
@@ -77,7 +81,7 @@ namespace Assets.Scripts.Both.Creature.Controllers
             {
                 Send = new ClientRpcSendParams
                 {
-                    TargetClientIds = new ulong[] { Owner }
+                    TargetClientIds = new ulong[] { OwnerClientId }
                 }
             };
 
@@ -92,7 +96,7 @@ namespace Assets.Scripts.Both.Creature.Controllers
             {
                 Send = new ClientRpcSendParams
                 {
-                    TargetClientIds = new ulong[] { Owner }
+                    TargetClientIds = new ulong[] { OwnerClientId }
                 }
             };
 
@@ -108,7 +112,7 @@ namespace Assets.Scripts.Both.Creature.Controllers
         [ServerRpc(RequireOwnership = false)]
         public void ResponseRefreshServerRpc(int number, ServerRpcParams serverRpcParams = default)
         {
-            if (Owner != serverRpcParams.Receive.SenderClientId) return;
+            if (OwnerClientId != serverRpcParams.Receive.SenderClientId) return;
 
             switch (number)
             {

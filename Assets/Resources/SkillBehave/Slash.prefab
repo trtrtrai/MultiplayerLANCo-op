@@ -14,13 +14,13 @@ GameObject:
   - component: {fileID: 2032351944057212244}
   - component: {fileID: 2032351944057212247}
   - component: {fileID: 2032351944057212201}
-  m_Layer: 6
-  m_Name: Sword
-  m_TagString: Sword
+  m_Layer: 0
+  m_Name: Slash
+  m_TagString: Skill
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2032351944057212200
 Transform:
   m_ObjectHideFlags: 0
